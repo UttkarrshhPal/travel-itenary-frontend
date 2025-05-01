@@ -15,11 +15,20 @@ export default function RecommendedItineraries() {
   const [region, setRegion] = useState<string | undefined>();
   const [shouldFetch, setShouldFetch] = useState(false);
 
-  const { data, isLoading, error } = useQuery<Itinerary[]>({
+  const { data: rawData, isLoading, error } = useQuery<Itinerary[]>({
     queryKey: ['recommended', nights, region, shouldFetch],
     queryFn: () => getRecommendedItineraries(nights, region),
     enabled: shouldFetch && Boolean(nights >= 2 && nights <= 8)
   });
+
+  // Filter unique itineraries by region
+  const data = rawData?.reduce((unique: Itinerary[], itinerary) => {
+    const exists = unique.find(item => item.region === itinerary.region);
+    if (!exists) {
+      unique.push(itinerary);
+    }
+    return unique;
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
