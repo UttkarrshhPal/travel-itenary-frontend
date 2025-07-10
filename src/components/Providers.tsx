@@ -32,11 +32,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
         disableTransitionOnChange
       >
         <ItineraryProvider>
-          <FilterProvider>
-            {children}
-            <Toaster />
-          </FilterProvider>
-        </ItineraryProvider>
+            <FilterProvider>
+              {children}
+              <Toaster />
+            </FilterProvider>
+          </ItineraryProvider>
       </NextThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

@@ -14,8 +14,6 @@ import {
 import { User, LogOut, Shield, MapPin } from "lucide-react";
 import { UserAvatar } from "./UseAvatar";
 
-
-
 export default function Navbar() {
   const { user, logout } = useAuth();
 
@@ -32,9 +30,6 @@ export default function Navbar() {
         <div className="flex items-center space-x-4">
           <Link href="/recommended">
             <Button variant="ghost">Recommended</Button>
-          </Link>
-          <Link href="/create">
-            <Button variant="ghost">Create</Button>
           </Link>
           <Link href="/itineraries">
             <Button variant="ghost">My Itineraries</Button>

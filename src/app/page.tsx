@@ -1,3 +1,4 @@
+// app/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -18,9 +19,8 @@ export default function Home() {
       try {
         await api.getLocations();
         setIsConnected(true);
-      } catch (error) {
+      } catch {
         setIsConnected(false);
-        console.error("API connection failed:", error);
       }
     }
     checkConnection();
@@ -49,7 +49,6 @@ export default function Home() {
           </div>
         </div>
       )}
-      
       <main className="container mx-auto px-4 py-12">
         {/* Hero Section */}
         <div className="text-center mb-12">
@@ -63,7 +62,6 @@ export default function Home() {
             Plan your perfect journey with our intelligent travel planning system. 
             Create custom itineraries or explore our curated recommendations.
           </p>
-          
           {/* Welcome message for logged in users */}
           {user && (
             <div className="mt-6">
@@ -73,7 +71,6 @@ export default function Home() {
             </div>
           )}
         </div>
-
         {/* Main Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="group hover:shadow-lg transition-all duration-300 border-primary/10 hover:border-primary/20">
@@ -112,7 +109,6 @@ export default function Home() {
               </Link>
             </CardContent>
           </Card>
-
           <Card className="group hover:shadow-lg transition-all duration-300 border-primary/10 hover:border-primary/20">
             <CardHeader>
               <div className="flex items-center justify-between mb-2">
