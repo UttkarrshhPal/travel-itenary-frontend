@@ -78,3 +78,9 @@ export interface Itinerary extends ItineraryFormData {
   transfers: Transfer[];
   activities: ItineraryActivity[];
 }
+
+export interface User {
+  username: string;
+  full_name: string;
+  role: string;
+}

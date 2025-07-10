@@ -86,3 +86,52 @@ export const api = {
     }
   }
 };
+
+export async function login(username: string, password: string) {
+  const formData = new FormData();
+  formData.append("username", username);
+  formData.append("password", password);
+  const res = await fetch("http://localhost:8000/login", {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.detail || "Login failed");
+  }
+  return res.json();
+}
+
+export async function logout() {
+  const res = await fetch("http://localhost:8000/logout", {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    throw new Error("Logout failed");
+  }
+  return res.json();
+}
+
+export async function getCurrentUser() {
+  const res = await fetch("http://localhost:8000/me", {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    return null;
+  }
+  return res.json();
+}
+
+export async function getProtectedMessage() {
+  const res = await fetch("http://localhost:8000/protected", {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    throw new Error("Not authorized");
+  }
+  return res.json();
+}
