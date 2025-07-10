@@ -91,7 +91,7 @@ export async function login(username: string, password: string) {
   const formData = new FormData();
   formData.append("username", username);
   formData.append("password", password);
-  const res = await fetch("http://localhost:8000/login", {
+  const res = await fetch(`${API_CONFIG.BASE_URL}/login`, {
     method: "POST",
     credentials: "include",
     body: formData,
@@ -104,7 +104,7 @@ export async function login(username: string, password: string) {
 }
 
 export async function logout() {
-  const res = await fetch("http://localhost:8000/logout", {
+  const res = await fetch(`${API_CONFIG.BASE_URL}/logout`, {
     method: "POST",
     credentials: "include",
   });
@@ -115,7 +115,7 @@ export async function logout() {
 }
 
 export async function getCurrentUser() {
-  const res = await fetch("http://localhost:8000/me", {
+  const res = await fetch(`${API_CONFIG.BASE_URL}/me`, {
     method: "GET",
     credentials: "include",
   });
@@ -126,7 +126,7 @@ export async function getCurrentUser() {
 }
 
 export async function getProtectedMessage() {
-  const res = await fetch("http://localhost:8000/protected", {
+  const res = await fetch(`${API_CONFIG.BASE_URL}/protected`, {
     method: "GET",
     credentials: "include",
   });

@@ -38,7 +38,7 @@ export default function LoginPage() {
     formData.append("password", password);
 
     try {
-      const res = await fetch("http://localhost:8000/login", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
         method: "POST",
         credentials: "include",
         body: formData,

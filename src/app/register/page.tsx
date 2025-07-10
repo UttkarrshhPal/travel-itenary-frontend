@@ -78,7 +78,7 @@ export default function RegisterPage() {
     };
 
     try {
-      const res = await fetch("http://localhost:8000/register", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -94,7 +94,7 @@ export default function RegisterPage() {
         loginFormData.append("username", formData.username);
         loginFormData.append("password", formData.password);
 
-        const loginRes = await fetch("http://localhost:8000/login", {
+        const loginRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
           method: "POST",
           credentials: "include",
           body: loginFormData,
