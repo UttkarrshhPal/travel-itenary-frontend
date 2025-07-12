@@ -3,6 +3,7 @@ import axios, { AxiosError } from 'axios';
 import { API_CONFIG } from './config';
 import { handleApiError } from './api-middleware';
 import { ItineraryCreate, Location } from '@/types/types';
+import { authStorage } from './auth-storage';
 
 const apiClient = axios.create({
   baseURL: API_CONFIG.BASE_URL,
@@ -10,6 +11,19 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = authStorage.getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 export const api = {
   // Itineraries
@@ -91,38 +105,60 @@ export async function login(username: string, password: string) {
   const formData = new FormData();
   formData.append("username", username);
   formData.append("password", password);
+  
   const res = await fetch(`${API_CONFIG.BASE_URL}/login`, {
     method: "POST",
-    credentials: "include",
     body: formData,
   });
+  
   if (!res.ok) {
     const data = await res.json();
     throw new Error(data.detail || "Login failed");
   }
-  return res.json();
+  
+  const data = await res.json();
+  authStorage.setToken(data.access_token);
+  authStorage.setUser(data.user);
+  return data;
 }
 
 export async function logout() {
-  const res = await fetch(`${API_CONFIG.BASE_URL}/logout`, {
-    method: "POST",
-    credentials: "include",
-  });
-  if (!res.ok) {
-    throw new Error("Logout failed");
+  authStorage.clear();
+  // Optionally call backend logout endpoint
+  try {
+    const token = authStorage.getToken();
+    await fetch(`${API_CONFIG.BASE_URL}/logout`, {
+      method: "POST",
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  } catch {
+    // Ignore logout errors
   }
-  return res.json();
 }
 
 export async function getCurrentUser() {
-  const res = await fetch(`${API_CONFIG.BASE_URL}/me`, {
-    method: "GET",
-    credentials: "include",
+  const token = authStorage.getToken();
+  
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/me`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : '',
+    },
   });
-  if (!res.ok) {
-    return null;
+
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('Not authenticated');
+    }
+    throw new Error(`Failed to get current user: ${response.status}`);
   }
-  return res.json();
+
+  const userData = await response.json();
+  return userData;
 }
 
 export async function getProtectedMessage() {

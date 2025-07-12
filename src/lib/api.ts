@@ -1,4 +1,6 @@
+// lib/api.ts
 import { Itinerary } from "@/types/types";
+import { API_CONFIG } from "./config";
 
 // Basic itinerary form data type
 export interface ItineraryFormData {
@@ -8,8 +10,6 @@ export interface ItineraryFormData {
   description: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
 export async function getRecommendedItineraries(nights: number, region?: string): Promise<Itinerary[]> {
   const params = new URLSearchParams();
   params.append('nights', nights.toString());
@@ -17,7 +17,9 @@ export async function getRecommendedItineraries(nights: number, region?: string)
     params.append('region', region);
   }
   
-  const response = await fetch(`${API_BASE_URL}/mcp/recommended-itineraries/?${params.toString()}`);
+  const response = await fetch(`${API_CONFIG.BASE_URL}/mcp/recommended-itineraries/?${params.toString()}`, {
+    credentials: 'include', // Add this
+  });
   if (!response.ok) {
     throw new Error('Failed to fetch recommended itineraries');
   }
@@ -25,7 +27,9 @@ export async function getRecommendedItineraries(nights: number, region?: string)
 }
 
 export async function getItinerary(id: number) {
-  const response = await fetch(`${API_BASE_URL}/itineraries/${id}`);
+  const response = await fetch(`${API_CONFIG.BASE_URL}/itineraries/${id}`, {
+    credentials: 'include', // Add this
+  });
   if (!response.ok) throw new Error('Failed to fetch itinerary');
   return response.json();
 }
@@ -40,11 +44,12 @@ export async function createItinerary(formData: ItineraryFormData) {
     activities: []
   };
 
-  const response = await fetch(`${API_BASE_URL}/itineraries/`, {
+  const response = await fetch(`${API_CONFIG.BASE_URL}/itineraries/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include', // Add this
     body: JSON.stringify(itineraryData),
   });
   if (!response.ok) throw new Error('Failed to create itinerary');

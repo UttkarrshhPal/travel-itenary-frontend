@@ -1,7 +1,8 @@
-// app/page.tsx
+// src/app/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
@@ -13,6 +14,14 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function Home() {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Redirect to login if not authenticated and not loading
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
 
   useEffect(() => {
     async function checkConnection() {
@@ -32,6 +41,11 @@ export default function Home() {
         <div className="animate-pulse text-lg">Loading...</div>
       </div>
     );
+  }
+
+  // Don't render content if no user (will redirect to login)
+  if (!user) {
+    return null;
   }
 
   return (
@@ -66,7 +80,7 @@ export default function Home() {
           {user && (
             <div className="mt-6">
               <p className="text-lg">
-                Welcome back, <span className="font-semibold text-primary">{user.full_name}</span>!
+                Welcome back, <span className="font-semibold text-primary">{user.full_name || user.username}</span>!
               </p>
             </div>
           )}

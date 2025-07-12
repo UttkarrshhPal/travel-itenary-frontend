@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { Loader2, AlertCircle, Eye, EyeOff, MapPin } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { authStorage } from "@/lib/auth-storage";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -26,7 +27,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
-  const { checkAuth } = useAuth(); // Add this
+  const { login } = useAuth();
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,14 +47,38 @@ export default function LoginPage() {
       });
 
       if (res.ok) {
-        // Force auth check after successful login
-        await checkAuth();
+        const loginData = await res.json();
+
+        // Extract user data
+        const userData = loginData.user || {
+          username: loginData.username || username,
+          full_name: loginData.full_name || username,
+          role: loginData.role || 'user'
+        };
+
+        // Store the token in localStorage
+        if (loginData.access_token) {
+          authStorage.setToken(loginData.access_token);
+
+          // Set cookie that the middleware expects
+          const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days or 24 hours
+          document.cookie = `access_token=${loginData.access_token}; path=/; max-age=${maxAge}; SameSite=Lax`;
+        }
+
+        login(userData);
+
+        // Small delay to ensure cookie is set
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Navigate to home
         router.push("/");
+        router.refresh();
+
       } else {
         const data = await res.json();
         setError(data.detail || "Login failed");
       }
-    } catch  {
+    } catch {
       setError("Network error. Please try again.");
     } finally {
       setIsLoading(false);

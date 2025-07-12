@@ -1,13 +1,15 @@
+// middleware.ts
 import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
   console.log('Middleware running for:', request.nextUrl.pathname);
   
-  const token = request.cookies.get('token');
+  // Check for both possible cookie names
+  const token = request.cookies.get('access_token') || request.cookies.get('token');
   const { pathname } = request.nextUrl;
 
   // Define public routes that don't require authentication
-  const publicRoutes = ['/login', '/register'];
+  const publicRoutes = ['/login', '/register', '/forgot-password'];
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
   // Allow public routes, API routes, and static files
@@ -16,7 +18,8 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon.ico') ||
-    pathname.startsWith('/public')
+    pathname.startsWith('/public') ||
+    pathname === '/.well-known/appspecific/com.chrome.devtools.json' // Chrome dev tools
   ) {
     return NextResponse.next();
   }
@@ -28,6 +31,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Optionally, you can validate the token here
+  console.log('Token found, proceeding with request');
   return NextResponse.next();
 }
 

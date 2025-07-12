@@ -8,6 +8,7 @@ import {
   ReactNode,
 } from "react";
 import { getCurrentUser } from "@/lib/api-client";
+import { authStorage } from "@/lib/auth-storage";
 
 interface User {
   username: string;
@@ -19,6 +20,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   checkAuth: () => Promise<void>;
+  login: (userData: User) => void;
   logout: () => Promise<void>;
 }
 
@@ -31,13 +33,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const checkAuth = async () => {
     setLoading(true);
     try {
+      const storedUser = authStorage.getUser();
+      if (storedUser) {
+        setUser(storedUser);
+      }
+
       const userData = await getCurrentUser();
-      setUser(userData);
+      if (userData) {
+        setUser(userData);
+        authStorage.setUser(userData);
+      } else {
+        setUser(null);
+        authStorage.clear(); // Changed from clearAuth() to clear()
+      }
     } catch {
       setUser(null);
+      authStorage.clear(); // Changed from clearAuth() to clear()
     } finally {
       setLoading(false);
     }
+  };
+
+  const login = (userData: User) => {
+    setUser(userData);
+    authStorage.setUser(userData);
   };
 
   useEffect(() => {
@@ -52,6 +71,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       if (res.ok) {
         setUser(null);
+        authStorage.clear();
+
+        // Clear the cookie
+        document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
         window.location.href = "/login";
       }
     } catch (error) {
@@ -60,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, checkAuth, logout }}>
+    <AuthContext.Provider value={{ user, loading, checkAuth, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
